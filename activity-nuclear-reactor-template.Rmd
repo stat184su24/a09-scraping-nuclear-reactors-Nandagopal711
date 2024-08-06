@@ -74,13 +74,42 @@ head(china)
 ```
 ```{r}
 china <- china %>%
+  filter(row_number() > 1) %>%
+  rename(
+    name = Plantname,
+    reactor = `UnitNo.`,
+    type = Type,
+    model = Model,
+    status = Status,
+    netMW = `Capacity(MW)`,
+    construction = `Beginbuilding`,
+    operation = `Commercialoperation`,
+    closure = Closed
+  ) %>%
   mutate(
-    Beginbuilding = dmy(Beginbuilding),
-    Commercialoperation = dmy(Commercialoperation),
-    Closed = dmy(Closed)
+    construction = dmy(construction),
+    operation = dmy(operation),
+    closure = dmy(closure)
   )
+```
+Merging the data:
 
-head(china)
+```{r}
+japan <- japan %>%
+  mutate(reactor = as.character(reactor))
+
+china <- china %>%
+  mutate(reactor = as.character(reactor))
+
+japan <- japan %>%
+  mutate(country = "Japan")
+
+china <- china %>%
+  mutate(country = "China")
+
+combined_data <- bind_rows(japan, china)
+
+combined_data
 ```
 
 
