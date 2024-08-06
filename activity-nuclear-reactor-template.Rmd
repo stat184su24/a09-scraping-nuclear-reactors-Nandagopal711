@@ -26,7 +26,7 @@ head(tableList[[21]])
 
 ## Your turn: In what ways is the table tidy? How is it not tidy? What’s different about it from a tidy table?
 
-The table is tidy cause each row contains a distinct observation about a specific unit of a nuclear power plant and each column represents a single variable such as 'Plant Name'. For power plants with multiple units, the Plant name is repeated in multiple rows this can be circumvented. In addition to this, there seems to be a lot of plain missing data. Also, the dates need to be converted to numeric format and the missing data needs to be filled in with N/A which is reccurent for currently operational plants. There are ways to make this table less redundant .
+The table is tidy cause each row contains a distinct observation about a specific unit of a nuclear power plant and each column represents a single variable such as 'Plant Name'. For power plants with multiple units, the Plant name is repeated in multiple rows this can be circumvented. In addition to this, there seems to be a lot of plain missing data. Also, the dates need to be converted to numeric format and the missing data needs to be filled in with N/A which is reccurent for currently operational plants.Lastly, the superscripts attribute to possible errors during data visualization since they make for new categories in certain variables for eg: i) Operational ii) Operational[81]. There are ways to make this table less redundant .
 
 ## Your Turn: Plot Net Generation Capacity vs Construction Date
 
@@ -117,6 +117,31 @@ combined_data
 ## Your Turn: Reconstruct Info Graphic of Japan Reactors (or other country of interest)
 
 ```{r}
-#My code here
+japan_data <- combined_data %>%
+  filter(country == "Japan") %>%
+  mutate(
+    duration = as.numeric(difftime(operation, construction, units = "days"))
+  )
+japan_data <- japan_data %>%
+  mutate(
+    status = str_replace_all(status, "\\[.*?\\]", "")   
+  )
+
+
+
+ggplot(japan_data, aes(y = reorder(name, construction), x = construction, xend = operation, color = status, linetype = type)) +
+  geom_segment(aes(xend = operation), size = 1.2) +
+  labs(
+    title = "Info Graphic regarding Commissioning for Nuclear Reactors in Japan",
+    x = "Date",
+    y = "Reactor Name",
+    color = "Status",
+    linetype = "Type"
+  ) +
+  theme_minimal() +
+  guides(
+    color = guide_legend(title = "Status"),
+    linetype = guide_legend(title = "Type")
+  )
 
 ```
