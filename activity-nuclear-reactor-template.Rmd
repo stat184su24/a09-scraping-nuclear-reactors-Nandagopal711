@@ -1,6 +1,6 @@
 ---
 title: "Activity: Nuclear Reactors"
-author: "YOUR NAME HERE"
+author: "Nandagopal Panicker"
 output: html_notebook
 ---
 
@@ -12,31 +12,75 @@ library(tidyverse)
 ## Scrape the Data 
 
 ```{r}
-#My code here.... 
+library(rvest)
 
+page <- "https://en.wikipedia.org/wiki/List_of_commercial_nuclear_reactors"
+tableList <- page %>%
+  read_html() %>%
+  html_nodes(css = "table") %>%
+  html_table(fill = TRUE)
 
+head(tableList[[21]])
 ```
 
 
 ## Your turn: In what ways is the table tidy? How is it not tidy? What’s different about it from a tidy table?
 
-My answer here..... 
-
+The table is tidy cause each row contains a distinct observation about a specific unit of a nuclear power plant and each column represents a single variable such as 'Plant Name'. For power plants with multiple units, the Plant name is repeated in multiple rows this can be circumvented. In addition to this, there seems to be a lot of plain missing data. Also, the dates need to be converted to numeric format and the missing data needs to be filled in with N/A which is reccurent for currently operational plants. There are ways to make this table less redundant .
 
 ## Your Turn: Plot Net Generation Capacity vs Construction Date
 
 ```{r}
-#my code here 
+japan <- tableList[[21]]
+str(japan)
 
+japan <-
+  japan %>%
+  filter(row_number() > 1) %>%
+  rename(name = Plantname, 
+         reactor = `UnitNo.`,
+         type = Type,
+         model = Model,
+         status = Status, 
+         netMW = `Capacity(MW)`,
+         construction = `Beginbuilding`,
+         operation = `Commercialoperation`, 
+         closure = Closed)
 
+japan <- japan %>%
+  mutate(
+    construction = dmy(construction),
+    operation = dmy(operation),
+    closure = dmy(closure)
+  )
+
+ggplot(japan, aes(x = construction, y = netMW, color = type)) +
+  geom_point() +
+  labs(
+    title = "Net Generation Capacity vs. Date of Construction",
+    x = "Date of Construction",
+    y = "Net Generation Capacity (MW)",
+    color = "Reactor Type"
+  ) +
+  theme_minimal()
 ```
 
 
 ## Your Turn: Scrape & Clean China Data (then merge with Japan)
 
 ```{r}
-#my code here... 
+china <- tableList[[10]]
+head(china)
+```
+```{r}
+china <- china %>%
+  mutate(
+    Beginbuilding = dmy(Beginbuilding),
+    Commercialoperation = dmy(Commercialoperation),
+    Closed = dmy(Closed)
+  )
 
+head(china)
 ```
 
 
